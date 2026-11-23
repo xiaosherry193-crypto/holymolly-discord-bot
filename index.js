@@ -13,6 +13,7 @@ const hm = new SlashCommandBuilder()
   .setDescription('HolyMolly tools')
   .addSubcommand(s => s.setName('ping').setDescription('Check online'))
   .addSubcommand(s => s.setName('preview-coastal-card').setDescription('Private River Journey preview'))
+  .addSubcommand(s => s.setName('preview-x-gta').setDescription('Private HolyMolly X post preview'))
   .addSubcommand(s => s.setName('publish').setDescription('Publish spotlight')
     .addStringOption(o => o.setName('title').setDescription('Title').setRequired(true))
     .addStringOption(o => o.setName('url').setDescription('URL').setRequired(true))
@@ -56,6 +57,29 @@ async function riverPreview() {
   return { content: '🌫️ **A tranquil journey awaits**', embeds: [embed], files: [file], ephemeral: true };
 }
 
+async function xGtaPreview() {
+  const postUrl = 'https://x.com/HolyMolly_AI/status/2123415748353970274';
+  const imageUrl = 'https://raw.githubusercontent.com/xiaosherry193-crypto/holymolly-discord-bot/main/holy-molly-x-gta.webp';
+  const response = await fetch(imageUrl);
+  if (!response.ok) throw new Error('X preview image failed: ' + response.status);
+  const file = new AttachmentBuilder(Buffer.from(await response.arrayBuffer()), { name: 'holy-molly-x-gta.webp' });
+  const embed = new EmbedBuilder()
+    .setColor(0x1d9bf0)
+    .setDescription([
+      '🚨 **How close can AI get to a real game world?**',
+      '',
+      'A HolyMolly creator brought a GTA-inspired city to life in 3D — complete with neon signs, police cars, flickering streetlights, and gritty street details. 🎮',
+      '',
+      'Looks familiar? Take a closer look. 👀',
+      '',
+      '🎬 **Watch the full post on X:** [Open the post](' + postUrl + ')',
+      '💛 **Follow us on X:** [@HolyMolly_AI](https://x.com/HolyMolly_AI)',
+      '🌍 **Create your own playable world:** [holymolly.ai](https://holymolly.ai)'
+    ].join('\n'))
+    .setImage('attachment://holy-molly-x-gta.webp');
+  return { content: '📣 **From HolyMolly on X**', embeds: [embed], files: [file], ephemeral: true };
+}
+
 (async () => {
   await new REST({ version: '10' }).setToken(token).put(Routes.applicationGuildCommands(clientId, guildId), { body: [hm] });
   await client.login(token);
@@ -68,6 +92,7 @@ client.on('interactionCreate', async i => {
     const s = i.options.getSubcommand();
     if (s === 'ping') return i.reply({ content: 'HolyMolly is online and ready.', ephemeral: true });
     if (s === 'preview-coastal-card') return i.reply(await riverPreview());
+    if (s === 'preview-x-gta') return i.reply(await xGtaPreview());
     if (s === 'publish') {
       const c = await client.channels.fetch(channelId);
       await c.send({ embeds: [basicEmbed(i.options.getString('title', true), i.options.getString('url', true), i.options.getString('image_url'))] });
