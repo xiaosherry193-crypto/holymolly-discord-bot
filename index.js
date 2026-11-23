@@ -63,21 +63,23 @@ async function xGtaPreview() {
   const response = await fetch(imageUrl);
   if (!response.ok) throw new Error('X preview image failed: ' + response.status);
   const file = new AttachmentBuilder(Buffer.from(await response.arrayBuffer()), { name: 'holy-molly-x-gta.webp' });
-  const embed = new EmbedBuilder()
+  const imageFrame = new EmbedBuilder()
     .setColor(0x1d9bf0)
-    .setDescription([
-      '🚨 **How close can AI get to a real game world?**',
-      '',
-      'A HolyMolly creator brought a GTA-inspired city to life in 3D — complete with neon signs, police cars, flickering streetlights, and gritty street details. 🎮',
-      '',
-      'Looks familiar? Take a closer look. 👀',
-      '',
-      '🎬 **Watch the full post on X:** [Open the post](' + postUrl + ')',
-      '💛 **Follow us on X:** [@HolyMolly_AI](https://x.com/HolyMolly_AI)',
-      '🌍 **Create your own playable world:** [holymolly.ai](https://holymolly.ai)'
-    ].join('\n'))
     .setImage('attachment://holy-molly-x-gta.webp');
-  return { content: '📣 **From HolyMolly on X**', embeds: [embed], files: [file], ephemeral: true };
+  const content = [
+    '📣 **From HolyMolly on X**',
+    '',
+    '🚨 **How close can AI get to a real game world?**',
+    '',
+    'A HolyMolly creator brought a GTA-inspired city to life in 3D — complete with neon signs, police cars, flickering streetlights, and gritty street details. 🎮',
+    '',
+    'Looks familiar? Take a closer look. 👀',
+    '',
+    '🎬 **Watch the full post on X:** [Open the post](' + postUrl + ')',
+    '💛 **Follow us on X:** [@HolyMolly_AI](https://x.com/HolyMolly_AI)',
+    '🌍 **Create your own playable world:** [holymolly.ai](https://holymolly.ai)'
+  ].join('\n');
+  return { content, embeds: [imageFrame], files: [file], ephemeral: true };
 }
 
 (async () => {
