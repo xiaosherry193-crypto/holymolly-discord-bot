@@ -17,6 +17,7 @@ const hm = new SlashCommandBuilder()
   .setDescription('HolyMolly tools')
   .addSubcommand(s => s.setName('ping').setDescription('Check online'))
   .addSubcommand(s => s.setName('preview-coastal-card').setDescription('Private River Journey preview'))
+  .addSubcommand(s => s.setName('publish-river-journey').setDescription('Publish confirmed River Journey card'))
   .addSubcommand(s => s.setName('preview-x-gta').setDescription('Private HolyMolly X post preview'))
   .addSubcommand(s => s.setName('publish').setDescription('Publish spotlight')
     .addStringOption(o => o.setName('title').setDescription('Title').setRequired(true))
@@ -31,7 +32,7 @@ const basicEmbed = (title, url, image) => {
   return e;
 };
 
-async function riverPreview() {
+async function riverMessage(ephemeral) {
   const gameUrl = 'https://game.holymolly.ai/artifact/r/run_3BqFcxsE3atm/index.html?lang=en';
   const screenshotUrl = 'https://raw.githubusercontent.com/xiaosherry193-crypto/holymolly-discord-bot/main/river-journey-gameplay.png';
   const response = await fetch(screenshotUrl);
@@ -51,7 +52,7 @@ async function riverPreview() {
     ].join('\n'))
     .setImage('attachment://river-journey.png')
     .setFooter({ text: 'Created with HolyMolly ✨' });
-  return { content: '🌫️ **A tranquil journey awaits**', embeds: [embed], files: [file], ephemeral: true };
+  return { content: '🌫️ **A tranquil journey awaits**', embeds: [embed], files: [file], ...(ephemeral ? { ephemeral: true } : {}) };
 }
 
 async function xGtaMessage(ephemeral) {
@@ -110,7 +111,13 @@ client.on('interactionCreate', async i => {
   try {
     const s = i.options.getSubcommand();
     if (s === 'ping') return i.reply({ content: 'HolyMolly is online and ready.', ephemeral: true });
-    if (s === 'preview-coastal-card') return i.reply(await riverPreview());
+    if (s === 'preview-coastal-card') return i.reply(await riverMessage(true));
+    if (s === 'publish-river-journey') {
+      const c = await client.channels.fetch(channelId);
+      if (!c || !c.isTextBased()) throw new Error('Spotlight channel unavailable');
+      await c.send(await riverMessage(false));
+      return i.reply({ content: 'River Journey published to creator-spotlight.', ephemeral: true });
+    }
     if (s === 'preview-x-gta') return i.reply(await xGtaMessage(true));
     if (s === 'publish') {
       const c = await client.channels.fetch(channelId);
