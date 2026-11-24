@@ -58,10 +58,7 @@ async function riverMessage(ephemeral) {
 
 async function smallExplorerMessage() {
   const gameUrl = 'https://game-test.holymolly.ai/artifact/r/run_BBWbwwkE2KKr/index.html';
-  const screenshotUrl = 'https://raw.githubusercontent.com/xiaosherry193-crypto/holymolly-discord-bot/main/small-explorer-gameplay.jpg';
-  const response = await fetch(screenshotUrl);
-  if (!response.ok) throw new Error('Small explorer screenshot request failed: ' + response.status);
-  const file = new AttachmentBuilder(Buffer.from(await response.arrayBuffer()), { name: 'small-explorer-gameplay.jpg' });
+  const file = new AttachmentBuilder('./small-explorer-gameplay.jpg', { name: 'small-explorer-gameplay.jpg' });
   const embed = new EmbedBuilder()
     .setTitle('small explorer')
     .setURL(gameUrl)
