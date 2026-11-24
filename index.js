@@ -17,6 +17,7 @@ const hm = new SlashCommandBuilder()
   .setDescription('HolyMolly tools')
   .addSubcommand(s => s.setName('ping').setDescription('Check online'))
   .addSubcommand(s => s.setName('preview-coastal-card').setDescription('Private River Journey preview'))
+  .addSubcommand(s => s.setName('preview-small-explorer').setDescription('Private small explorer preview'))
   .addSubcommand(s => s.setName('publish-river-journey').setDescription('Publish confirmed River Journey card'))
   .addSubcommand(s => s.setName('preview-x-gta').setDescription('Private HolyMolly X post preview'))
   .addSubcommand(s => s.setName('publish').setDescription('Publish spotlight')
@@ -53,6 +54,29 @@ async function riverMessage(ephemeral) {
     .setImage('attachment://river-journey.png')
     .setFooter({ text: 'Created with HolyMolly ✨' });
   return { content: '🌫️ **A tranquil journey awaits**', embeds: [embed], files: [file], ...(ephemeral ? { ephemeral: true } : {}) };
+}
+
+async function smallExplorerMessage() {
+  const gameUrl = 'https://game-test.holymolly.ai/artifact/r/run_BBWbwwkE2KKr/index.html';
+  const screenshotUrl = 'https://raw.githubusercontent.com/xiaosherry193-crypto/holymolly-discord-bot/main/small-explorer-gameplay.jpg';
+  const response = await fetch(screenshotUrl);
+  if (!response.ok) throw new Error('Small explorer screenshot request failed: ' + response.status);
+  const file = new AttachmentBuilder(Buffer.from(await response.arrayBuffer()), { name: 'small-explorer-gameplay.jpg' });
+  const embed = new EmbedBuilder()
+    .setTitle('small explorer')
+    .setURL(gameUrl)
+    .setColor(0x6f7652)
+    .setDescription([
+      'Step into a grand forest through the eyes of a tiny mouse. Wander beneath giant leaves, climb over roots and rocks, and discover a little red-and-white plane waiting among the trees. Explore freely at your own pace — no enemies, no timer. 🍃',
+      '', '🎮 **Experience**',
+      'Roam through an oversized woodland, climb across the environment, and uncover small surprises hidden throughout the forest.',
+      '', '🕹️ **Controls**',
+      'WASD — Move', 'Shift — Run', 'Space — Jump', 'Drag / Arrow Keys — Look around', 'E — Interact',
+      '', '🔗 **Play now**', '[Open small explorer](' + gameUrl + ')'
+    ].join('\n'))
+    .setImage('attachment://small-explorer-gameplay.jpg')
+    .setFooter({ text: 'Created with HolyMolly ✨' });
+  return { content: '🐭 **A tiny adventure begins**', embeds: [embed], files: [file], ephemeral: true };
 }
 
 async function xGtaMessage(ephemeral) {
@@ -112,6 +136,7 @@ client.on('interactionCreate', async i => {
     const s = i.options.getSubcommand();
     if (s === 'ping') return i.reply({ content: 'HolyMolly is online and ready.', ephemeral: true });
     if (s === 'preview-coastal-card') return i.reply(await riverMessage(true));
+    if (s === 'preview-small-explorer') return i.reply(await smallExplorerMessage());
     if (s === 'publish-river-journey') {
       const c = await client.channels.fetch(channelId);
       if (!c || !c.isTextBased()) throw new Error('Spotlight channel unavailable');
