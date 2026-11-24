@@ -18,6 +18,7 @@ const hm = new SlashCommandBuilder()
   .addSubcommand(s => s.setName('ping').setDescription('Check online'))
   .addSubcommand(s => s.setName('preview-coastal-card').setDescription('Private River Journey preview'))
   .addSubcommand(s => s.setName('preview-small-explorer').setDescription('Private small explorer preview'))
+  .addSubcommand(s => s.setName('publish-small-explorer').setDescription('Publish confirmed small explorer card'))
   .addSubcommand(s => s.setName('publish-river-journey').setDescription('Publish confirmed River Journey card'))
   .addSubcommand(s => s.setName('preview-x-gta').setDescription('Private HolyMolly X post preview'))
   .addSubcommand(s => s.setName('publish').setDescription('Publish spotlight')
@@ -56,7 +57,7 @@ async function riverMessage(ephemeral) {
   return { content: '🌫️ **A tranquil journey awaits**', embeds: [embed], files: [file], ...(ephemeral ? { ephemeral: true } : {}) };
 }
 
-async function smallExplorerMessage() {
+async function smallExplorerMessage(ephemeral) {
   const gameUrl = 'https://game-test.holymolly.ai/artifact/r/run_BBWbwwkE2KKr/index.html';
   const file = new AttachmentBuilder('./small-explorer-gameplay.jpg', { name: 'small-explorer-gameplay.jpg' });
   const embed = new EmbedBuilder()
@@ -73,7 +74,7 @@ async function smallExplorerMessage() {
     ].join('\n'))
     .setImage('attachment://small-explorer-gameplay.jpg')
     .setFooter({ text: 'Created with HolyMolly ✨' });
-  return { content: '🐭 **A tiny adventure begins**', embeds: [embed], files: [file], ephemeral: true };
+  return { content: '🐭 **A tiny adventure begins**', embeds: [embed], files: [file], ...(ephemeral ? { ephemeral: true } : {}) };
 }
 
 async function xGtaMessage(ephemeral) {
@@ -133,7 +134,13 @@ client.on('interactionCreate', async i => {
     const s = i.options.getSubcommand();
     if (s === 'ping') return i.reply({ content: 'HolyMolly is online and ready.', ephemeral: true });
     if (s === 'preview-coastal-card') return i.reply(await riverMessage(true));
-    if (s === 'preview-small-explorer') return i.reply(await smallExplorerMessage());
+    if (s === 'preview-small-explorer') return i.reply(await smallExplorerMessage(true));
+    if (s === 'publish-small-explorer') {
+      const c = await client.channels.fetch(channelId);
+      if (!c || !c.isTextBased()) throw new Error('Spotlight channel unavailable');
+      await c.send(await smallExplorerMessage(false));
+      return i.reply({ content: 'small explorer published to creator-spotlight.', ephemeral: true });
+    }
     if (s === 'publish-river-journey') {
       const c = await client.channels.fetch(channelId);
       if (!c || !c.isTextBased()) throw new Error('Spotlight channel unavailable');
