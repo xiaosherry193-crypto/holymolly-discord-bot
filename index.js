@@ -21,6 +21,7 @@ const hm = new SlashCommandBuilder()
   .addSubcommand(s => s.setName('publish-small-explorer').setDescription('Publish confirmed small explorer card'))
   .addSubcommand(s => s.setName('publish-river-journey').setDescription('Publish confirmed River Journey card'))
   .addSubcommand(s => s.setName('preview-x-gta').setDescription('Private HolyMolly X post preview'))
+  .addSubcommand(s => s.setName('preview-x-ski').setDescription('Private HolyMolly ski X post preview'))
   .addSubcommand(s => s.setName('publish').setDescription('Publish spotlight')
     .addStringOption(o => o.setName('title').setDescription('Title').setRequired(true))
     .addStringOption(o => o.setName('url').setDescription('URL').setRequired(true))
@@ -96,6 +97,25 @@ async function xGtaMessage(ephemeral) {
   return { content, embeds: [imageFrame], files: [file], ...(ephemeral ? { ephemeral: true } : {}) };
 }
 
+async function xSkiMessage(ephemeral) {
+  const postUrl = 'https://x.com/HolyMolly_AI/status/2123066131347034181';
+  const imageUrl = 'https://raw.githubusercontent.com/xiaosherry193-crypto/holymolly-discord-bot/main/skiing-gameplay.jpg';
+  const response = await fetch(imageUrl);
+  if (!response.ok) throw new Error('Ski preview image failed: ' + response.status);
+  const file = new AttachmentBuilder(Buffer.from(await response.arrayBuffer()), { name: 'skiing-gameplay.jpg' });
+  const imageFrame = new EmbedBuilder().setColor(0x1d9bf0).setImage('attachment://skiing-gameplay.jpg');
+  const content = [
+    '📣 **From HolyMolly on X**', '',
+    '🎿 **Which model builds the better ski world?**', '',
+    'We put Opus 5.5 and GPT-6.2 Astra head-to-head with the exact same reference image and prompt. Astra pushed the terrain further — with dramatic halfpipes, massive jumps, and a more ambitious mountain playground. 🏔️', '',
+    'See the difference for yourself. 👀', '',
+    '🎬 **Watch the full post on X:** [Open the post](' + postUrl + ')',
+    '💛 **Follow us on X:** [@HolyMolly_AI](https://x.com/HolyMolly_AI)',
+    '🌍 **Create your own playable world:** [holymolly.ai](https://holymolly.ai)'
+  ].join('\n');
+  return { content, embeds: [imageFrame], files: [file], ...(ephemeral ? { ephemeral: true } : {}) };
+}
+
 async function publishScheduledGta() {
   if (gtaPublished) return;
   gtaPublished = true;
@@ -148,6 +168,7 @@ client.on('interactionCreate', async i => {
       return i.reply({ content: 'River Journey published to creator-spotlight.', ephemeral: true });
     }
     if (s === 'preview-x-gta') return i.reply(await xGtaMessage(true));
+    if (s === 'preview-x-ski') return i.reply(await xSkiMessage(true));
     if (s === 'publish') {
       const c = await client.channels.fetch(channelId);
       await c.send({ embeds: [basicEmbed(i.options.getString('title', true), i.options.getString('url', true), i.options.getString('image_url'))] });
